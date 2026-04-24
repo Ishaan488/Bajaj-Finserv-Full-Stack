@@ -11,7 +11,7 @@ const parts = raw.split(',');
 }  
 
   try {
-    const res = await fetch('http://localhost:3000/bfhl', {
+    const res = await fetch('https://bajaj-finserv-full-stack-one.vercel.app/bhfl', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data })
