@@ -13,6 +13,24 @@ function isValid(entry) {
   return true;
 }
 
+function hasCycle(root, children) {
+  const visited = new Set();
+
+  function check(node) {
+    if (visited.has(node)) return true;
+    visited.add(node);
+    if (children[node]) {
+      for (let child of children[node]) {
+        if (check(child)) return true;
+      }
+    }
+    visited.delete(node);
+    return false;
+  }
+
+  return check(root);
+}
+
 function buildTrees(valid) {
   let children = {};
   let hasParent = new Set();
