@@ -16,19 +16,29 @@ function isValid(entry) {
 function hasCycle(root, children) {
   const visited = new Set();
 
-  function check(node) {
+  function dfs(node) {
     if (visited.has(node)) return true;
     visited.add(node);
     if (children[node]) {
       for (let child of children[node]) {
-        if (check(child)) return true;
+        if (dfs(child)) return true;
       }
     }
     visited.delete(node);
     return false;
   }
 
-  return check(root);
+  return dfs(root);
+}
+
+function getDepth(node, children) {
+  if (!children[node] || children[node].length === 0) return 1;
+  let max = 0;
+  for (let child of children[node]) {
+    const d = getDepth(child, children);
+    if (d > max) max = d;
+  }
+  return 1 + max;
 }
 
 function buildTrees(valid) {
@@ -38,7 +48,6 @@ function buildTrees(valid) {
 
   for (let i = 0; i < valid.length; i++) {
     let edge = valid[i];
-
     let parent = edge[0];
     let child = edge[3];
 
@@ -54,6 +63,7 @@ function buildTrees(valid) {
       hasParent.add(child);
     }
   }
+
   let roots = [];
   for (let node of allNodes) {
     if (hasParent.has(node) === false) {
@@ -62,6 +72,7 @@ function buildTrees(valid) {
   }
 
   roots.sort();
+
   function makeTree(node) {
     let result = {};
     if (children[node] !== undefined) {
@@ -74,18 +85,33 @@ function buildTrees(valid) {
   }
 
   let hierarchies = [];
-  for (let root of roots.sort()) {
-  const tree = { [root]: buildNode(root) };
+  let total_trees = 0;
+  let total_cycles = 0;
+  let largest_tree_root = '';
+  let maxDepth = 0;
 
-  if (hasCycle(root, children)) {
-    hierarchies.push({ root, tree: {}, has_cycle: true });
-  } else {
-    const depth = getDepth(root);
-    hierarchies.push({ root, tree, depth });
+  for (let root of roots) {
+    const tree = { [root]: makeTree(root) };
+
+    if (hasCycle(root, children)) {
+      total_cycles++;
+      hierarchies.push({ root, tree: {}, has_cycle: true });
+    } else {
+      const depth = getDepth(root, children);
+      total_trees++;
+      if (depth > maxDepth) {
+        maxDepth = depth;
+        largest_tree_root = root;
+      } else if (depth === maxDepth && root < largest_tree_root) {
+        largest_tree_root = root;
+      }
+      hierarchies.push({ root, tree, depth });
+    }
   }
-}
 
-  return hierarchies;
+  const summary = { total_trees, total_cycles, largest_tree_root };
+
+  return { hierarchies, summary };
 }
 
 app.post('/bfhl', (req, res) => {
@@ -108,9 +134,9 @@ app.post('/bfhl', (req, res) => {
     }
   }
 
-  const hierarchies = buildTrees(valid);
+  const { hierarchies, summary } = buildTrees(valid);
 
-  res.json({ valid, invalid, duplicate, hierarchies });
+  res.json({ valid, invalid, duplicate, hierarchies, summary });
 });
 
 app.listen(3000, () => {
