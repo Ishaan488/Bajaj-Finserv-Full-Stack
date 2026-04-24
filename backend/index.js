@@ -74,15 +74,16 @@ function buildTrees(valid) {
   }
 
   let hierarchies = [];
-  for (let i = 0; i < roots.length; i++) {
-    let root = roots[i];
-    let tree = {};
-    tree[root] = makeTree(root);
-    hierarchies.push({
-      root: root,
-      tree: tree
-    });
+  for (let root of roots.sort()) {
+  const tree = { [root]: buildNode(root) };
+
+  if (hasCycle(root, children)) {
+    hierarchies.push({ root, tree: {}, has_cycle: true });
+  } else {
+    const depth = getDepth(root);
+    hierarchies.push({ root, tree, depth });
   }
+}
 
   return hierarchies;
 }
