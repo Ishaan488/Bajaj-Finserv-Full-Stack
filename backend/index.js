@@ -2,12 +2,36 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
+function isValid(entry) {
+  const trimmed = entry.trim();
+  const pattern = /^[A-Z]->[A-Z]$/;
+  if (!pattern.test(trimmed)){
+     return false;
+  }
+  if (trimmed[0] === trimmed[3]){
+    return false;
+  }
+  return true;
+}
+
 app.post('/bfhl', (req, res) => {
-  res.json({ message: 'bhfl working' });
+  const data = req.body.data || [];
+
+  const valid = [];
+
+  for (let entry of data) {
+    const trimmed = entry.trim();
+    if (isValid(trimmed)) {
+      valid.push(trimmed);
+    }
+  }
+
+  res.json({
+    valid
+  });
 });
 
 app.listen(3000, () => {
