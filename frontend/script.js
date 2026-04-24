@@ -11,7 +11,7 @@ const parts = raw.split(',');
 }  
 
   try {
-    const res = await fetch('https://bajaj-finserv-full-stack-one.vercel.app/bhfl', {
+    const res = await fetch('https://bajaj-finserv-full-stack-one.vercel.app/bfhl', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data })
